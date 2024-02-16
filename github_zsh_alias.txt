@@ -1,0 +1,51 @@
+## Git alias ###
+alias gi="git init"
+alias ga="git add ."
+alias gcm='git commit -m'
+alias gp='git push'
+
+# Alias para git commit com mensagem personalizada e push para uma branch específica
+# exemplo: gcmp "mensagem para commit" master
+gcmp() {
+    git add .
+    if [ "$1" != "" ]; then
+        git commit -m "$1"
+    else
+        git commit -m "update"
+    fi
+
+    if [ "$2" != "" ]; then
+        git push origin "$2"
+    else
+        git push origin master
+    fi
+}
+
+
+# Alias para criar uma pull request com opções de branches
+pr() {
+    local current_branch
+    local target_branch
+    local delete_branch
+    # Obtém o nome da branch atual
+    current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+    # Pergunta ao usuário qual é a branch de destino
+    echo -n "Digite o nome da branch de destino (padrão: master): "
+    read target_branch
+    target_branch=${target_branch:-master}
+
+    # Faz o push da branch atual e cria a pull request
+    git push origin "$current_branch" && gh pr create --base "$target_branch" --head "$current_branch"
+
+    # Pergunta ao usuário se deseja apagar a branch atual
+    echo -n  "Deseja apagar a branch atual? (s/n): "
+    read delete_branch
+    if [ "$delete_branch" = "s" ]; then
+       git checkout "$target_branch"
+       git branch -d "$current_branch"
+    fi
+
+    git pull
+}
+## End Github Alias
